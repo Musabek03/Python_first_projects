@@ -1,9 +1,60 @@
 from django.db import models
+from datetime import datetime
+from django.utils import timezone
+from django.contrib.auth.models import User
+
+
+
+#class Author(models.Model):
+    #name = models.CharField(max_length=100,verbose_name="Avtor ati")
+    #bio = models.TextField(blank=True, verbose_name="Ozi haqqinda")
+
+    #def __str__(self):
+        #return self.name
+    
+
+
+class Category(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Kategoriya ati")
+
+    def __str__(self):
+        return self.name
+    
+
+class Tag(models.Model):
+    name = models.CharField(max_length=100, verbose_name="Teg ati")
+
+    def __str__(self):
+        return self.name
+
+class Comment(models.Model):
+    post = models.ForeignKey('Post', on_delete=models.CASCADE, related_name='Comment')
+    user = models.ForeignKey(User, on_delete=models.CASCADE)
+    text = models.TextField()
+    created_date = models.DateTimeField(default=timezone.now)
+
+    def __str__(self):
+        return self.text
+
+
+
+
 
 class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
+    is_published = models.BooleanField(default=False, verbose_name="Post juklengenba?")
+    created_at = models.DateTimeField(default=timezone.now, verbose_name="Jaratilgan waqti")
+    updated_at = models.DateTimeField(auto_now=True, verbose_name="Ozgergen waqti")
+    category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategoriya", related_name='posts')
+    tags = models.ManyToManyField(Tag, blank=True, verbose_name="Tegler", related_name='posts')
+    user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Avtor", related_name='posts')
+    
+
+    #author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name="Avtor", related_name='posts')
+
 
 
     def __str__(self):
         return self.title
+    
