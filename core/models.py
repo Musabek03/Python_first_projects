@@ -44,6 +44,7 @@ class Post(models.Model):
     title = models.CharField(max_length=100)
     content = models.TextField()
     is_published = models.BooleanField(default=False, verbose_name="Post juklengenba?")
+    view_count = models.IntegerField(default=0)
     created_at = models.DateTimeField(default=timezone.now, verbose_name="Jaratilgan waqti")
     updated_at = models.DateTimeField(auto_now=True, verbose_name="Ozgergen waqti")
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategoriya", related_name='posts')
