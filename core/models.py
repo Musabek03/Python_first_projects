@@ -5,12 +5,12 @@ from django.contrib.auth.models import User
 
 
 
-#class Author(models.Model):
-    #name = models.CharField(max_length=100,verbose_name="Avtor ati")
-    #bio = models.TextField(blank=True, verbose_name="Ozi haqqinda")
+# class Author(models.Model):
+#     name = models.CharField(max_length=100,verbose_name="Avtor ati")
+#     bio = models.TextField(blank=True, verbose_name="Ozi haqqinda")
 
-    #def __str__(self):
-        #return self.name
+#     def __str__(self):
+#         return self.name
     
 
 
@@ -50,8 +50,6 @@ class Post(models.Model):
     category = models.ForeignKey(Category, on_delete=models.CASCADE, verbose_name="Kategoriya", related_name='posts')
     tags = models.ManyToManyField(Tag, blank=True, verbose_name="Tegler", related_name='posts')
     user = models.ForeignKey(User, on_delete=models.CASCADE, verbose_name="Avtor", related_name='posts')
-    
-
     #author = models.ForeignKey(Author, on_delete=models.CASCADE, verbose_name="Avtor", related_name='posts')
 
 

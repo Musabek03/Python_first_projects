@@ -29,6 +29,11 @@ class CommentAdmin(admin.ModelAdmin):
     search_fields = ('text','post',)
     list_filter = ('post',)
 
+# @admin.register(Author)
+# class AuthorAdmin(admin.ModelAdmin):
+#     list_display = ('name',)
+
+
 
     
 

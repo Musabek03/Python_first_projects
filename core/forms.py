@@ -18,7 +18,7 @@ class PostForm(forms.ModelForm):
             "title": forms.TextInput(attrs={'class': 'form-control'}),
             "content": forms.Textarea(attrs={'class': 'form-control'}),
             "is_published": forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            "author": forms.Select(attrs={'class': 'form-select'}),
+            "user": forms.Select(attrs={'class': 'form-select'}),
             "tags": forms.SelectMultiple(attrs={'class': 'form-select'}),     
             "category": forms.Select(attrs={'class': 'form-select'}),
                   

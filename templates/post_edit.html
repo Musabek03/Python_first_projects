@@ -1,0 +1,22 @@
+{% extends "base.html" %}
+
+{% block title %}Postti ozgertiw{% endblock %}
+
+{% block content %}
+<nav aria-label="breadcrumb">
+    <ol class="breadcrumb">
+        <li class="breadcrumb-item active" aria-current="page">Home</li>
+    </ol>
+</nav>
+
+<div class="card p-2 mx-auto" style="width: 48rem;">
+    <h1 class="text-center card-title">Postti ozgertiw</h1>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <button type="submit" class="btn btn-primary">Saqlaw</button>
+        </form>
+    </div>
+</div>
+{% endblock %}

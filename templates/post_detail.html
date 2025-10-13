@@ -5,14 +5,47 @@
 
 
 {% block content %} 
-<nav aria-label="breadcrumb">
-  <ol class="breadcrumb">
-    <li class="breadcrumb-item"><a href="/">Home</a></li>
-    <li class="breadcrumb-item"><a href="/posts/">Postlar</a></li>
-    <li class="breadcrumb-item active" aria-current="page">{{post.title}}</li>
-  </ol>
-</nav>
-<h1>{{ post.title }}</h1>
-<p> {{post.content}} </p>
+<div class="d-flex justify-content-between align-items-center">
+  <h1>{{object.title}}</h1>  
+  <div>
+    <button  class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Oshiriw</button>
+    <a href="/posts/{{object.id}}/edit/" class="btn btn-warning btn-sm">Ozgertiw</a>
+  </div>
+</div>
+<p>{{object.content}}</p>
+ 
+<p>Author: {{object.user}} </p>
+<p>Post jazilgan waqti: {{object.created_at}}</p>
+
+
+
+
+<div class="modal" tabindex="-1" id="deleteModal" aria-labelledby="deleteModalLabel" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title">"{{ object.title }}" atli postti rastanda oshirejaqsizba?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Close"></button>
+      </div>
+     
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yaq</button>
+        <form method="POST">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-primary">Awa,oshiriw</button>
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+
+
+
 
 {% endblock %}
+
+
+
+
+
