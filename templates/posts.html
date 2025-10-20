@@ -16,18 +16,60 @@
 </div>
 
 
+<form method="GET" class="row g-3 mt-3">
+  <div class="col-md-4">
+    <input type="text" name="search" class="form-control" placeholder="Izlew..." value="{{ request.GET.search }}">
+  </div>
+  <div class="col-md-3">
+    <select name="category" class="form-select">
+      <option value="">Bárlıq kategoriya</option>
+      {% for category in categories %}
+      <option value="{{ category.id }}" {% if request.GET.category == category.id|stringformat:"s" %}selected{% endif %}>{{ category.name }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-3">
+    <select name="author" class="form-select">
+      <option value="">Bárlıq avtorlar</option>
+      {% for author in authors %}
+      <option value="{{ author.id }}" {% if request.GET.author == author.id|stringformat:"s" %}selected{% endif %}>{{ author.username }}</option>
+      {% endfor %}
+    </select>
+  </div>
+  <div class="col-md-2">
+    <button type="submit" class="btn btn-primary"><i class="bi bi-search"></i> Filtrlaw</button>
+  </div>
+</form>
+
+
+
+
 <div class="row g-4 mt-3">
-    {% for post in posts %}
-    <div class="col-4">
-        <div class="card">
-            <div class="card-body">
-                <h5 class="card-title">{{post.title}}</h5>
-                <p class="card-text">{{post.content|truncatewords:5}}</p>
-                <a href="/posts/{{post.id}}/" class="btn btn-primary">Toliq oqiw</a>
-            </div>
+  {% for post in object_list %}
+  <div class="col-4">
+    <div class="card">
+      <div class="card-body">
+        <h5 class="card-title">{{post.title}}</h5>
+        <div class="d-flex gap-3 mb-2">
+          <small class="badge text-bg-secondary">{{post.category.name}}</small>
+          <small class="text-muted"><i class="bi bi-person"></i> {{post.author.username}} </small>
+          <small class="text-muted"><i class="bi bi-calendar-week"></i> {{post.created_at|date:"Y-m-d H:i"}}</small>
         </div>
+        <p class="card-text">{{post.content|truncatewords:5}}</p>
+        <p>
+          {% for tag in post.tags.all %}
+          <small class="text-muted">#{{tag.name}}</small>
+          {% endfor %}
+        </p>
+
+        <div class="d-flex justify-content-between align-items-center">
+          <a href="/posts/{{post.id}}/" class="btn btn-primary">Tolıq oqıw</a>
+          <span class="text-muted"><i class="bi bi-eye"></i> {{post.view_count}}</span>
+        </div>
+      </div>
     </div>
-    {% endfor %}
+  </div>
+  {% endfor %}
 </div>
 
 {% endblock %}

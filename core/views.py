@@ -1,9 +1,8 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from .models import Post
+from .models import Post,Category,User
 from .forms import PostForm
-from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView,DeleteView
-
+from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
 
 
 
@@ -16,10 +15,30 @@ class PostListView(ListView):
     template_name = 'posts.html'
     context_object_name = 'posts'
 
-    def get_queryset(self):
-        return Post.objects.filter(is_published=True)
+    def get_context_data(self, **kwargs):
+        context = super().get_context_data(**kwargs)
+        context['categories'] = Category.objects.all()
+        context['authors'] = User.objects.all()
+        return context
+    
+    def  get_queryset(self):
+        queryset = super().get_queryset()
+        search = self.request.GET.get('search', '')
+        category = self.request.GET.get('category', '')
+        author = self.request.GET.get('author', '')
+        if search:
+            queryset = queryset.filter(title__icontains=search) 
+        if category:
+            queryset = queryset.filter(category__id=category)
+        if author:
+            queryset = queryset.filter(user__id=author)
+        return queryset.filter(is_published=True).order_by('-created_at')
+
+    
 
 
+    # def get_queryset(self):
+    #     return Post.objects.filter(is_published=True)
 
 
 
@@ -28,10 +47,23 @@ class PostDetailView(DetailView):
     template_name = 'post_detail.html'
     context_object_name = 'post'
 
+    # def form_valid(self, form):
+    #     if self.object.author != self.request.user:
+    #         form.add_error(None, "Siz bul posttı óshire almaýsız.")
+    #         return self.form_invalid(form)
+    #     return super().form_valid(form)
+
     def post(self, request, *args, **kwargs):
         post = self.get_object()
         post.delete()
         return redirect('posts')
+    
+    def get_context_data(self, **kwargs):
+        context =  super().get_context_data(**kwargs)
+        context['popular_posts'] = Post.objects.order_by('-view_count')[:5]
+        return context
+        
+
 
 
 class PostCreateView(CreateView):
@@ -39,6 +71,13 @@ class PostCreateView(CreateView):
     form_class = PostForm
     template_name = 'create_post.html'
     success_url = reverse_lazy('posts')
+
+    def form_valid(self, form):
+        form.instance.user = self.request.user 
+        return super().form_valid(form)
+    
+
+
 
 
 class AboutPageView(TemplateView):
@@ -51,7 +90,19 @@ class PostUpdateView(UpdateView):
     template_name = 'post_edit.html'
     success_url = reverse_lazy('posts')
 
+    def form_valid(self, form):
+        if form.instance.user != self.request.user:
+            form.add_error(None, "Siz bul posttı jańalay almaýsız.")
+            return self.form_invalid(form)
+        return super().form_valid(form)
+    
+    def get_success_url(self):
+        return reverse_lazy('post_detail', kwargs={'pk': self.object.pk})
 
+    # def def form_valid(self, form):
+    #     if form self.object.user = self.request.user
+    #     return super().form_valid(form)
+    
 
 # class PostDeleteView(DeleteView):
 #     model = Post

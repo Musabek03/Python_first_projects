@@ -10,15 +10,19 @@ class ContactForm(forms.Form):
 
 
 class PostForm(forms.ModelForm):
+    # class Meta:
+    #     model = Post
+    #     fields = '__all__'
+    #     exclude = ('view_count', 'user') 
+
     class Meta:
         model = Post
-        fields = "__all__"
-        exclude = ('view_count', 'created_at', 'updated_at')
+        fields = ('title', 'content', 'tags', 'is_published','category')
+        exclude = ( 'created_at', 'updated_at')
         widgets = {
             "title": forms.TextInput(attrs={'class': 'form-control'}),
             "content": forms.Textarea(attrs={'class': 'form-control'}),
             "is_published": forms.CheckboxInput(attrs={'class': 'form-check-input'}),
-            "user": forms.Select(attrs={'class': 'form-select'}),
             "tags": forms.SelectMultiple(attrs={'class': 'form-select'}),     
             "category": forms.Select(attrs={'class': 'form-select'}),
                   
