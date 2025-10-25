@@ -5,6 +5,10 @@ from .forms import PostForm
 from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
 from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
 from django.contrib import messages
+from django.utils import timezone
+from datetime import timedelta
+
+
 
 
 
@@ -38,13 +42,6 @@ class PostListView(ListView):
     
    
 
-    
-
-
-    # def get_queryset(self):
-    #     return Post.objects.filter(is_published=True)
-
-
 
 class PostDetailView(LoginRequiredMixin,DetailView):
     model = Post
@@ -54,22 +51,22 @@ class PostDetailView(LoginRequiredMixin,DetailView):
 
     def get(self, request, *args, **kwargs):
         response = super().get(request, *args, **kwargs)
-        UserPostAction.objects.get_or_create(user=request.user, post=self.object)
+        user_post_action, created = UserPostAction.objects.get_or_create(user=request.user, post=self.object)
+        if not created:
+            dt = timezone.now() - user_post_action.updated_at   
+            max_time_delta = timedelta(minutes=5)
+            if dt > max_time_delta:
+                user_post_action.view_count += 1
+                user_post_action.save()
+              
         return response
     
-    
 
-    def post(self, request, *args, **kwargs):
-        post = self.get_object()    
-        if post.user != request.user:
-            messages.error(request, "Siz bul postti oshire almaysiz!")
-            return redirect('post_detail', pk=post.pk)
-        post.delete()
-        return redirect('posts')
-    
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
         context['popular_posts'] = self.model.objects.filter(is_published=True)[:5]
+        #context['user_post_action'] = self.object.user_actions.get(user=self.request.user) Usi kodtin ornina tomendegini jazdim
+        context['user_post_action'] = self.object.user_actions.filter(user=self.request.user).first()
         return context
     
     
@@ -111,64 +108,21 @@ class PostUpdateView(PermissionRequiredMixin,UpdateView):
     def get_success_url(self):
         return reverse_lazy('post_detail', kwargs={'pk': self.object.pk})
 
-    # def def form_valid(self, form):
-    #     if form self.object.user = self.request.user
-    #     return super().form_valid(form)
-    
-
-# class PostDeleteView(DeleteView):
-#     model = Post
-#     template_name = 'post_delete.html'
-#     success_url = reverse_lazy('posts')
 
 
-    
+class UserActionUpdateView(LoginRequiredMixin, UpdateView):
+    model = Post
 
-
-
-
-
-
-
-
-#     def posts_view(request):
-#     search_text = request.GET.get('search')
-#     context = {
-#         'posts': Post.objects.all()
-#     }
-#     return render(request,'posts.html',context)
-
-
-
-
-# def post_detail_view(request, id):
-
-#     context = {
-#         'post': Post.objects.get(id=id)
-#     }
-
-#     return render(request,'post_detail.html', context)
-
-
-# def home_view(request):
-#     return render(request, 'home.html')
-
-
-
-
-# def create_post_view(request):
-#     if request.method == 'POST': 
-#         form = PostForm(request.POST)
-#         if form.is_valid():
-#             form.save()
-#             return redirect('posts')
-#     else:
-#         form = PostForm()
-        
-
-#     context = {
-#         'form': form
-    
-#     }
-
-#     return render(request, 'create_post.html', context)
+    def post(self, request, *args, **kwargs):
+        form_data = request.POST
+        post = self.get_object()
+        action = form_data.get('action')
+        user_post_action = post.user_actions.get(user=request.user)
+        if action == 'like':
+            user_post_action.liked = True
+            user_post_action.disliked = False
+        elif action == 'dislike':
+            user_post_action.liked = False
+            user_post_action.disliked = True
+        user_post_action.save()
+        return redirect('post_detail', pk=post.id)
