@@ -1,0 +1,14 @@
+{% extends 'base.html' %}
+{% block content %}
+<div class="card p-2 mx-auto" style="width: 48rem;">
+    <h2 class="card-title text-center mt-3">Sistemaga kiriw</h2>
+    <div class="card-body">
+        <form method="post">
+            {% csrf_token %}
+            {{ form.as_p }}
+            <p class="text-muted small">Eger sizde akkaunt joq bolsa <a href="{% url 'signup' %}">dizimnen otin</a>.</p>
+            <button type="submit" class="btn btn-primary">Kiriw</button>
+        </form>
+    </div>
+</div>
+{% endblock content %}

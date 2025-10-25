@@ -1,0 +1,18 @@
+{% extends "base.html" %}
+
+{% block title %}Profile{% endblock %}
+
+{% block content %}
+<h1>Xosh keldińiz {{user.username}}!</h1>
+<p>Atiniz: {{user.first_name}}</p>
+<p>Familiyaniz: {{user.last_name}}</p>
+<p>Email: {{user.email}}</p>
+<!-- Change password -->
+<div class="d-flex">
+    <a href="{% url 'password_change' %}" class="btn btn-primary">Paroldi ozgertiw</a>
+    <form class="ms-2" method="post" action="{% url 'logout' %}">
+        {% csrf_token %}
+        <button type="submit" class="btn btn-danger">Shigiw</button>
+    </form>
+</div>
+{% endblock %}

@@ -5,11 +5,25 @@
 
 
 {% block content %} 
+
+{% if messages %}
+  <ul class="messages">
+    {% for message in messages %}
+      <li class="{{ message.tags }}">{{ message }}</li>
+    {% endfor %}
+  </ul>
+{% endif %}
+
+
 <div class="d-flex justify-content-between align-items-center">
   <h1>{{object.title}}</h1>  
   <div>
+     {% if perms.core.delete_post %}
     <button  class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModal">Oshiriw</button>
+    {% endif %}
+     {% if perms.core.change_post %}
     <a href="/posts/{{object.id}}/edit/" class="btn btn-warning btn-sm">Ozgertiw</a>
+    {% endif %}
   </div>
 </div>
 <p>{{object.content}}</p>

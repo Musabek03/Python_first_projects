@@ -1,8 +1,10 @@
 from django.shortcuts import render, redirect
 from django.urls import reverse_lazy
-from .models import Post,Category,User
+from .models import Post,Category,User, UserPostAction,Comment
 from .forms import PostForm
 from django.views.generic import TemplateView,ListView,DetailView,CreateView,UpdateView
+from django.contrib.auth.mixins import LoginRequiredMixin, PermissionRequiredMixin
+from django.contrib import messages
 
 
 
@@ -33,6 +35,8 @@ class PostListView(ListView):
         if author:
             queryset = queryset.filter(user__id=author)
         return queryset.filter(is_published=True).order_by('-created_at')
+    
+   
 
     
 
@@ -42,35 +46,42 @@ class PostListView(ListView):
 
 
 
-class PostDetailView(DetailView):
+class PostDetailView(LoginRequiredMixin,DetailView):
     model = Post
     template_name = 'post_detail.html'
     context_object_name = 'post'
+    
 
-    # def form_valid(self, form):
-    #     if self.object.author != self.request.user:
-    #         form.add_error(None, "Siz bul posttı óshire almaýsız.")
-    #         return self.form_invalid(form)
-    #     return super().form_valid(form)
+    def get(self, request, *args, **kwargs):
+        response = super().get(request, *args, **kwargs)
+        UserPostAction.objects.get_or_create(user=request.user, post=self.object)
+        return response
+    
+    
 
     def post(self, request, *args, **kwargs):
-        post = self.get_object()
+        post = self.get_object()    
+        if post.user != request.user:
+            messages.error(request, "Siz bul postti oshire almaysiz!")
+            return redirect('post_detail', pk=post.pk)
         post.delete()
         return redirect('posts')
     
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
-        context['popular_posts'] = Post.objects.order_by('-view_count')[:5]
+        context['popular_posts'] = self.model.objects.filter(is_published=True)[:5]
         return context
+    
+    
         
 
-
-
-class PostCreateView(CreateView):
+class PostCreateView(PermissionRequiredMixin,CreateView):
     model = Post
     form_class = PostForm
     template_name = 'create_post.html'
     success_url = reverse_lazy('posts')
+    permission_required = 'core.add_post'
+
 
     def form_valid(self, form):
         form.instance.user = self.request.user 
@@ -84,11 +95,12 @@ class AboutPageView(TemplateView):
     template_name = 'about.html'
 
 
-class PostUpdateView(UpdateView):
+class PostUpdateView(PermissionRequiredMixin,UpdateView):
     model = Post
     form_class = PostForm
     template_name = 'post_edit.html'
     success_url = reverse_lazy('posts')
+    permission_required = 'core.change_post'
 
     def form_valid(self, form):
         if form.instance.user != self.request.user:
