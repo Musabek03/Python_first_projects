@@ -31,17 +31,6 @@
 <p>Author: {{object.user}} </p>
 <p>Post jazilgan waqti: {{object.created_at}}</p>
 
-<!-- Like Dislike Form -->
-{% comment %} <form action="user_action_update/" method="post">
-  {% csrf_token %}
-  <label for="like">Like</label>
-  <input  type="radio" name="action" value="like" id="like"  {% if user_post_action.liked %} checked {% endif %}>
-  <label for="dislike">Dislike</label>
-  <input type="radio" name="action" value="dislike" id="dislike" {% if user_post_action.disliked %} checked {% endif %}>
-  <input type="submit" value="Submit" class="btn btn-primary">
-</form>
-<hr> {% endcomment %}
-
 <form action="user_action_update/" method="post" class="d-flex align-items-center gap-3">
   {% csrf_token %}
 
@@ -63,8 +52,83 @@
 <hr class="my-4">
 
 
+ {% comment %} Komment qaldiriw bolimi {% endcomment %}
+<h2>Comments:</h2>
+
+ <div class="container my-4">
+  <div class="card shadow-sm">
+    <div class="card-body">
+      <h5 class="card-title mb-3">Kommentariya qaldiriw</h5>
+
+      <form method="post" action="{% url 'user_action_comment' object.id %}" name="text">
+          {% csrf_token %}
+        <div class="mb-3">
+          <textarea name="comment_text" id="id_body" rows="4"class="form-control"placeholder="Kommentariyanizdi jazip qaldirin..." required ></textarea>
+        </div>
+
+        <div class="text-end">
+          <button type="submit" class="btn btn-primary px-4">Jiberiw</button>
+        </div>
+      </form>
+    </div>
+  </div>
+</div>
 
 
+{% comment %} Kommentariya bolimi {% endcomment %}
+
+{% for comment in object.comments.all %} 
+
+<div class="card">
+  <div class="d-flex justify-content-between align-items-center">
+    <div class="card-header ">
+      {{comment.user}} 
+    </div>
+    <div>
+      {% if user == comment.user or user.is_superuser and perms.core.delete_comment %}
+    <button  class="btn btn-danger btn-sm" data-bs-toggle="modal" data-bs-target="#deleteModalComment{{comment.id}}">Oshiriw</button>
+    {% endif %}
+    </div>
+  </div>
+  <div class="card-body">
+    <figure>
+      <blockquote class="blockquote">
+        <p>{{comment.text}}</p>
+      </blockquote>
+      <figcaption class="blockquote-footer">
+       <small>  <cite title="Source Title">{{comment.created_date|date:"d.m.Y H:i" }}</cite> </small> 
+      </figcaption>
+    </figure>
+  </div>
+ <hr class="my-1">
+</div>
+
+{% comment %} Modal Komment {% endcomment %}
+<div class="modal fade" id="deleteModalComment{{comment.id}}" tabindex="-1" aria-labelledby="deleteCommentModalLabel{{comment.id}}" aria-hidden="true">
+  <div class="modal-dialog">
+    <div class="modal-content">
+      <div class="modal-header">
+        <h5 class="modal-title" id="deleteCommentModalLabel{{comment.id}}">Kommentariyani oshirejaqsizba?</h5>
+        <button type="button" class="btn-close" data-bs-dismiss="modal" aria-label="Yopish"></button>
+      </div>
+      {{comment.text}}
+      <div class="modal-footer">
+        <button type="button" class="btn btn-secondary" data-bs-dismiss="modal">Yaq</button>
+        <form method="post" action="{% url 'user_action_comment' object.id %}">
+          {% csrf_token %}
+          <input type="hidden" name="delete_comment_id" value="{{ comment.id }}">
+          <button type="submit" class="btn btn-danger">Oshiriw</button>
+         
+        </form>
+      </div>
+    </div>
+  </div>
+</div>
+
+ {%endfor%}
+
+
+ {% comment %} Popular posts {% endcomment %}
 <h2>Popular posts:</h2>
 
 <div class="row g-4 mt-3">
@@ -80,7 +144,6 @@
     </div>
     {% endfor %}
 </div>
-
 
 
 <div class="modal" tabindex="-1" id="deleteModal" aria-labelledby="deleteModalLabel" aria-hidden="true">
@@ -101,9 +164,6 @@
     </div>
   </div>
 </div>
-
-
-
 
 
 {% endblock %}

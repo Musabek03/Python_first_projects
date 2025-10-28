@@ -16,6 +16,7 @@ class HomePageView(TemplateView):
     template_name = 'home.html'
 
 
+
 class PostListView(ListView):
     model = Post
     template_name = 'posts.html'
@@ -61,6 +62,14 @@ class PostDetailView(LoginRequiredMixin,DetailView):
               
         return response
     
+    def post(self, request, *args, **kwargs):
+        post = self.get_object()    
+        if post.user != request.user:
+            messages.error(request, "Siz bul postti oshire almaysiz!")
+            return redirect('post_detail', pk=post.pk)
+        post.delete()
+        return redirect('posts')
+    
 
     def get_context_data(self, **kwargs):
         context =  super().get_context_data(**kwargs)
@@ -87,9 +96,10 @@ class PostCreateView(PermissionRequiredMixin,CreateView):
 
 
 
-
 class AboutPageView(TemplateView):
     template_name = 'about.html'
+
+
 
 
 class PostUpdateView(PermissionRequiredMixin,UpdateView):
@@ -126,3 +136,37 @@ class UserActionUpdateView(LoginRequiredMixin, UpdateView):
             user_post_action.disliked = True
         user_post_action.save()
         return redirect('post_detail', pk=post.id)
+    
+
+
+
+class UserActionComment(LoginRequiredMixin, DetailView):
+    template_name = 'post_detail.html' 
+    model = Post
+    
+    def post(self, request, *args, **kwargs):
+        
+        post = self.get_object()
+
+        if "delete_comment_id" in request.POST:
+            comment_id = request.POST.get("delete_comment_id")
+            comment = Comment.objects.get(id=comment_id)
+
+            if comment.user != request.user and not request.user.is_superuser: 
+                messages.error(request, "Siz bul kommentti oshire almaysiz!")
+                return redirect('post_detail', pk=post.pk)
+            comment.delete()
+
+        text = request.POST.get('comment_text')
+        if text:
+            comment = Comment.objects.create(post=post, user=request.user, text=text)
+            comment.save()
+
+        return redirect('post_detail', pk=post.id)
+    
+
+    
+
+
+    
+

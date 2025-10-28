@@ -14,7 +14,7 @@ class PostForm(forms.ModelForm):
     #     model = Post
     #     fields = '__all__'
     #     exclude = ('view_count', 'user') 
-
+    
     class Meta:
         model = Post
         fields = ('title', 'content', 'tags', 'is_published','category')
